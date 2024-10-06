@@ -1,10 +1,10 @@
-##EduAce Student Exam Preparation Assistant
-#Problem Statement
+**EduAce Student Exam Preparation Assistant**
+**Problem Statement**
 Students often face challenges in preparing for exams due to the overwhelming amount of information and resources scattered across various textbooks, online resources, and question banks. This fragmentation of information makes it difficult to get detailed explanations, relevant practice questions, and mock exams in a unified platform. Furthermore, personalized assistance and interactive methods like quizzes or audio explanations are often missing in traditional study approaches.
 
 The problem becomes even more pronounced for students preparing for specific curricula (e.g., CBSE, ISCE) as it requires targeted study materials, which aren't always available in one place. Additionally, students often lack immediate access to question banks, mock exams, and proctored environments that simulate real exam conditions.
 
-#Solution
+**Solution**
 The GenAI-Powered Student Exam Preparation Assistant addresses these issues by leveraging the power of Google’s Generative AI (Gemini) and Text-to-Speech (TTS) technology to provide a comprehensive study tool. This tool solves the problem in the following ways:
 
 1. Personalized Topic Explanations
