@@ -1,6 +1,5 @@
-streamlit
-transformers
-tokenizers
-gtts
-fpdf
-pyngrok
+streamlit 
+google.generativeai 
+os
+tempfile
+gtts 
