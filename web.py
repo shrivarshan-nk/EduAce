@@ -5,7 +5,7 @@ import tempfile
 from gtts import gTTS
 
 # Set your Gemini API key
-os.environ["GEMINI_API_KEY"] = "AIzaSyDPTFON8aL0sNuBWm7LL3jMuFataX75VzQ"  # Replace with your actual API key
+os.environ["GEMINI_API_KEY"] = "KEY" 
 
 # Configure the API with the key
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
