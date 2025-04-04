@@ -99,7 +99,32 @@ class FaceDetectionProcessor(VideoProcessorBase):
 rtc_config = RTCConfiguration({
     "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
 })
-if selected_task == "Take Test":
+if selected_task == "Explain Topic":
+    st.header("Topic Explanation")
+    topic = st.text_input("Enter the topic you want explained:", "")
+    curriculum = st.selectbox("Select Curriculum", ["CBSE", "TN-ST", "ISCE", "Other"])
+    
+    if st.checkbox("Generate Explanation"):
+        if topic:
+            explanation = generate_explanation(topic, curriculum)
+            st.subheader("Explanation:")
+            st.write(explanation)
+            
+            # Generate audio for the explanation
+            if st.checkbox("Generate Audio Explanation"):
+                audio_file = generate_audio(explanation, topic)
+                st.audio(audio_file)
+                
+            # Generate quiz questions
+            if st.checkbox("Generate Quiz Questions"):
+                quiz_questions = generate_quiz(explanation)
+                st.subheader("Quiz Questions:")
+                st.write(quiz_questions)
+                st.session_state.question_bank[topic] = quiz_questions
+        else:
+            st.warning("Please enter a topic to explain.")
+            
+elif selected_task == "Take Test":
     st.header("AI Proctored Test")
     subject = st.text_input("Enter the subject for the test:", "")
     start_proctoring = st.checkbox("Enable AI Proctoring")
@@ -134,80 +159,6 @@ elif selected_task == "Audio Topics":
             st.audio(audio_path)
     else:
         st.write("No audio files generated yet.")
-
-elif selected_task == "Take Test":
-    st.header("AI Proctored Test")
-    subject = st.text_input("Enter the subject for the test:", "")
-    # Start AI Proctoring
-    start_proctoring = st.checkbox("Enable AI Proctoring")
-    if st.button("Generate Question Paper"):
-        if subject:
-            question_paper = generate_question_paper(subject)
-            st.session_state.mock_qps[subject] = question_paper
-            st.subheader("Sample Question Paper:")
-            st.write(question_paper)
-            
-            # File uploader for submitting the test
-            st.subheader("Upload Your Test Answer File")
-            uploaded_file = st.file_uploader("Choose a file")
-        
-            if uploaded_file is not None:
-                st.write("File uploaded successfully.")
-                st.write("File name:", uploaded_file.name)
-            else:
-                st.write("Please upload your test answer file.")
-        else:
-            st.warning("Please enter a subject.")
-            
-    if start_proctoring:
-        st.write("AI Proctoring is now active. Please ensure you are facing the camera.")
-        video_stream = cv2.VideoCapture(0)
-
-        if not video_stream.isOpened():
-            st.error("Could not open video stream. Ensure your camera is working.")
-        else:
-            not_facing_alert_container = st.empty()
-            multiple_faces_alert_container = st.empty()
-            face_not_detected_start = None
-            multiple_faces_flag = False
-            not_facing_flag = False
-
-            with st.empty():
-                while True:
-                    ret, frame = video_stream.read()
-                    if not ret:
-                        break
-
-                    frame = cv2.flip(frame, 1)
-                    frame, faces = detect_faces(frame)
-
-                    for (x, y, w, h) in faces:
-                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 128, 128), 2)
-
-                    num_faces = len(faces)
-
-                    if num_faces == 0:
-                        if not face_not_detected_start:
-                            face_not_detected_start = datetime.now()
-                        elif (datetime.now() - face_not_detected_start).seconds > 5:
-                            if not not_facing_flag:
-                                not_facing_alert_container.warning("Warning: Face not detected for over 5 seconds!")
-                                not_facing_flag = True
-                    elif num_faces == 1:
-                        face_not_detected_start = None
-                        not_facing_alert_container.empty()
-                        not_facing_flag = False
-                        multiple_faces_flag = False
-                        multiple_faces_alert_container.empty()
-                    else:
-                        if not multiple_faces_flag:
-                            multiple_faces_alert_container.error("Warning: Multiple faces detected! Ensure only one person is in view.")
-                            multiple_faces_flag = True
-
-                    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    st.image(rgb_frame, channels="RGB")
-
-            video_stream.release()
 
 elif selected_task == "Mock QP":
     st.header("Mock Question Papers")
