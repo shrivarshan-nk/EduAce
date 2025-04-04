@@ -2,7 +2,8 @@ FROM python:3.9
  
  # Set the working directory in the container
  WORKDIR /app
- 
+ RUN apt-get update && apt-get install -y python3-opencv
+ RUN pip install opencv-python
  # Copy the current directory contents into the container at /app
  COPY requirements.txt ./
  RUN pip install -r requirements.txt
