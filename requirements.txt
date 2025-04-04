@@ -1,5 +1,7 @@
-streamlit 
-google.generativeai 
+streamlit
+google.generativeai
 os
 tempfile
-gtts 
+gtts
+cv2
+datetime
