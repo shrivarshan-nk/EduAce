@@ -1,29 +1,17 @@
-FROM python:3.9-slim
-
-# Install system dependencies required for OpenCV
-RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    ffmpeg \
-    libgtk2.0-dev \
-    libavcodec-dev \
-    libavformat-dev \
-    libswscale-dev \
- && rm -rf /var/lib/apt/lists/*
-
-# Set working directory
-WORKDIR /app
-
-# Copy and install dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy app code
-COPY . .
-
-# Run the Streamlit app
-CMD ["streamlit", "run", "web.py", "--server.port=8080", "--server.address=0.0.0.0"]
+FROM python:3.9
+ 
+ # Set the working directory in the container
+ WORKDIR /app
+ 
+ # Copy the current directory contents into the container at /app
+ COPY requirements.txt ./
+ RUN pip install -r requirements.txt
+ 
+ # Copy everything else
+ COPY . .
+ 
+ # Expose the port that Streamlit uses
+ EXPOSE 8080
+ 
+ # Start the Streamlit app
+ CMD streamlit run web.py --server.port=8080 --server.address=0.0.0.0 --server.headless=true
