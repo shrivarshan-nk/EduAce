@@ -1,6 +1,5 @@
 streamlit
 google.generativeai
-tempfile
 gtts
 cv2
-datetime
+
