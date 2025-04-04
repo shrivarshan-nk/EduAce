@@ -131,7 +131,6 @@ elif selected_task == "Take Test":
     start_proctoring = st.checkbox("Enable AI Proctoring")
     
     if st.button("Generate Question Paper"):
-        if st.button("Generate Question Paper"):
             if subject:
                 question_paper = generate_question_paper(subject)
                 st.session_state.mock_qps[subject] = question_paper
