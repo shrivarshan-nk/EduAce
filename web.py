@@ -124,24 +124,36 @@ if selected_task == "Explain Topic":
         else:
             st.warning("Please enter a topic to explain.")
             
+           
 elif selected_task == "Take Test":
     st.header("AI Proctored Test")
     subject = st.text_input("Enter the subject for the test:", "")
     start_proctoring = st.checkbox("Enable AI Proctoring")
     
     if st.button("Generate Question Paper"):
-        if subject:
-            question_paper = f"Sample question paper for {subject}"
-            st.session_state.mock_qps[subject] = question_paper
-            st.subheader("Sample Question Paper:")
-            st.write(question_paper)
-        else:
-            st.warning("Please enter a subject.")
-    
+        if st.button("Generate Question Paper"):
+            if subject:
+                question_paper = generate_question_paper(subject)
+                st.session_state.mock_qps[subject] = question_paper
+                st.subheader("Sample Question Paper:")
+                st.write(question_paper)
+                
+                # File uploader for submitting the test
+                st.subheader("Upload Your Test Answer File")
+                uploaded_file = st.file_uploader("Choose a file")
+            
+                if uploaded_file is not None:
+                    st.write("File uploaded successfully.")
+                    st.write("File name:", uploaded_file.name)
+                else:
+                    st.write("Please upload your test answer file.")
+            else:
+                st.warning("Please enter a subject.")
+              
     if start_proctoring:
         st.write("AI Proctoring is now active. Please ensure you are facing the camera.")
         webrtc_streamer(key="proctoring", video_processor_factory=FaceDetectionProcessor, rtc_configuration=rtc_config)
-        
+
 elif selected_task == "View Question Bank":
     st.header("Question Bank")
     if st.session_state.question_bank:
