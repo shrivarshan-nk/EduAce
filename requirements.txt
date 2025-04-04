@@ -1,6 +1,5 @@
 streamlit
 google.generativeai
-os
 tempfile
 gtts
 cv2
