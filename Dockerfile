@@ -1,4 +1,4 @@
-FROM python:3.9  # Or your preferred version
+FROM python:3.9
 
 # Install system dependencies required by OpenCV
 RUN apt-get update && apt-get install -y \
