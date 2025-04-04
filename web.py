@@ -6,10 +6,10 @@ import tempfile
 from gtts import gTTS
 import cv2
 from datetime import datetime
+from streamlit_webrtc import webrtc_streamer, VideoProcessorBase, RTCConfiguration
 
-# Set your Gemini API key
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
 # Initialize the face detector
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -61,32 +61,62 @@ def detect_faces(frame):
     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
     return frame, faces
 
-# Main logic for selected tasks
-if selected_task == "Explain Topic":
-    st.header("Topic Explanation")
-    topic = st.text_input("Enter the topic you want explained:", "")
-    curriculum = st.selectbox("Select Curriculum", ["CBSE", "TN-ST", "ISCE", "Other"])
-    
-    if st.checkbox("Generate Explanation"):
-        if topic:
-            explanation = generate_explanation(topic, curriculum)
-            st.subheader("Explanation:")
-            st.write(explanation)
-            
-            # Generate audio for the explanation
-            if st.checkbox("Generate Audio Explanation"):
-                audio_file = generate_audio(explanation, topic)
-                st.audio(audio_file)
-                
-            # Generate quiz questions
-            if st.checkbox("Generate Quiz Questions"):
-                quiz_questions = generate_quiz(explanation)
-                st.subheader("Quiz Questions:")
-                st.write(quiz_questions)
-                st.session_state.question_bank[topic] = quiz_questions
-        else:
-            st.warning("Please enter a topic to explain.")
+# WebRTC Video Processor for AI Proctoring
+class FaceDetectionProcessor(VideoProcessorBase):
+    def __init__(self):
+        self.face_not_detected_start = None
+        self.not_facing_flag = False
+        self.multiple_faces_flag = False
 
+    def recv(self, frame):
+        img = frame.to_ndarray(format="bgr24")
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+
+        for (x, y, w, h) in faces:
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 128, 128), 2)
+
+        num_faces = len(faces)
+
+        if num_faces == 0:
+            if not self.face_not_detected_start:
+                self.face_not_detected_start = datetime.now()
+            elif (datetime.now() - self.face_not_detected_start).seconds > 5:
+                if not self.not_facing_flag:
+                    st.warning("Warning: Face not detected for over 5 seconds!")
+                    self.not_facing_flag = True
+        elif num_faces == 1:
+            self.face_not_detected_start = None
+            self.not_facing_flag = False
+            self.multiple_faces_flag = False
+        else:
+            if not self.multiple_faces_flag:
+                st.error("Warning: Multiple faces detected! Ensure only one person is in view.")
+                self.multiple_faces_flag = True
+
+        return frame.from_ndarray(img, format="bgr24")
+
+rtc_config = RTCConfiguration({
+    "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+})
+if selected_task == "Take Test":
+    st.header("AI Proctored Test")
+    subject = st.text_input("Enter the subject for the test:", "")
+    start_proctoring = st.checkbox("Enable AI Proctoring")
+    
+    if st.button("Generate Question Paper"):
+        if subject:
+            question_paper = f"Sample question paper for {subject}"
+            st.session_state.mock_qps[subject] = question_paper
+            st.subheader("Sample Question Paper:")
+            st.write(question_paper)
+        else:
+            st.warning("Please enter a subject.")
+    
+    if start_proctoring:
+        st.write("AI Proctoring is now active. Please ensure you are facing the camera.")
+        webrtc_streamer(key="proctoring", video_processor_factory=FaceDetectionProcessor, rtc_configuration=rtc_config)
+        
 elif selected_task == "View Question Bank":
     st.header("Question Bank")
     if st.session_state.question_bank:
