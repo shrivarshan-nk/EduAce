@@ -2,4 +2,4 @@ streamlit
 google.generativeai
 gtts
 opencv-python
-
+streamlit_webrtc
